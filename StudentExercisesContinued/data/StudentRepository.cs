@@ -7,7 +7,7 @@ namespace StudentExercisesContinued.Data
     /// <summary>
     ///  An object to contain all database interactions.
     /// </summary>
-    public class ExerciseRepository
+    public class StudentRepository
     {
         /// <summary>
         ///  Represents a connection to the database.
@@ -25,106 +25,102 @@ namespace StudentExercisesContinued.Data
         }
 
         /// <summary>
-        ///  Returns a list of all exercises in the database
+        ///  Returns a list of all students in the database
         /// </summary>
-        public List<Exercise> GetAllExercises()
+        public List<Student> GetAllStudents()
         {
-           
+
             using (SqlConnection conn = Connection)
             {
-               
+
                 conn.Open();
 
-                
+
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Id, Name, Language FROM Exercise";
+                    cmd.CommandText = "SELECT Id, FirstName, LastName, SlackHandle, CohortId FROM Student";
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<Exercise> exercises = new List<Exercise>();
+                    List<Student> students = new List<Student>();
 
                     while (reader.Read())
                     {
-                        int idColumnPosition = reader.GetOrdinal("Id");
-                        int idValue = reader.GetInt32(idColumnPosition);
 
-                        int nameColumnPosition = reader.GetOrdinal("Name");
-                        string nameValue = reader.GetString(nameColumnPosition);
-
-                        int langColumnPosition = reader.GetOrdinal("Language");
-                        string langValue = reader.GetString(langColumnPosition);
-
-                        Exercise exercise = new Exercise
+                        Student student = new Student
                         {
-                            Id = idValue,
-                            Name = nameValue,
-                            Language = langValue
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle"))
                         };
 
-                        exercises.Add(exercise);
+                        students.Add(student);
                     }
 
                     reader.Close();
 
-                    return exercises;
+                    return students;
                 }
             }
         }
 
         /// <summary>
-        ///  Returns a single exercise with the given id.
+        ///  Returns a single student with the given id.
         /// </summary>
-        public Exercise GetExerciseById(int id)
+        public Student GetStudentById(int id)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Name, Language FROM Exercise WHERE Id = @id";
+                    cmd.CommandText = "SELECT Id, FirstName, LastName, SlackHandle, CohortId FROM Student WHERE Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    Exercise exercise = null;
+                    Student student = null;
 
                     // If we only expect a single row back from the database, we don't need a while loop.
                     if (reader.Read())
                     {
-                        exercise = new Exercise
+                        student = new Student
                         {
                             Id = id,
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                            Language = reader.GetString(reader.GetOrdinal("Language"))
+                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle"))
                         };
                     }
 
                     reader.Close();
 
-                    return exercise;
+                    return student;
                 }
             }
         }
 
         /// <summary>
-        ///  Add a new exercise to the database
+        ///  Add a new student to the database
         ///   NOTE: This method sends data to the database,
         ///   it does not get anything from the database, so there is nothing to return.
         /// </summary>
-        public void AddExercise(Exercise exercise)
+        public void AddStudent(Student student)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    
-                    cmd.CommandText = "INSERT INTO Exercise (Name, Language) OUTPUT INSERTED.Id Values (@Name, @Language)";
-                    cmd.Parameters.Add(new SqlParameter("@deptName", exercise.Name));
-                    cmd.Parameters.Add(new SqlParameter("@Language", exercise.Language));
+
+                    cmd.CommandText = "INSERT INTO Student (FirstName, LastName, SlackHandle, CohortId) OUTPUT INSERTED.Id Values (@Name, @Language)";
+                    cmd.Parameters.Add(new SqlParameter("@deptName", student.FirstName));
+                    cmd.Parameters.Add(new SqlParameter("@Language", student.LastName));
                     int id = (int)cmd.ExecuteScalar();
 
-                    exercise.Id = id;
+                    student.Id = id;
 
 
                 }
@@ -133,20 +129,20 @@ namespace StudentExercisesContinued.Data
         }
 
         /// <summary>
-        ///  Updates the exercise with the given id
+        ///  Updates the student with the given id
         /// </summary>
-        public void UpdateExercise(int id, Exercise exercise)
+        public void UpdateStudent(int id, Student student)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"UPDATE Exercise
+                    cmd.CommandText = @"UPDATE Student
                                      SET Name = @Name, Language = @Language
                                      WHERE Id = @id";
-                    cmd.Parameters.Add(new SqlParameter("@Name", exercise.Name));
-                    cmd.Parameters.Add(new SqlParameter("@Language", exercise.Language));
+                    cmd.Parameters.Add(new SqlParameter("@Name", student.Name));
+                    cmd.Parameters.Add(new SqlParameter("@Language", student.Language));
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     cmd.ExecuteNonQuery();
@@ -155,16 +151,16 @@ namespace StudentExercisesContinued.Data
         }
 
         /// <summary>
-        ///  Delete the exercise with the given id
+        ///  Delete the student with the given id
         /// </summary>
-        public void DeleteExercise(int id)
+        public void DeleteStudent(int id)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "DELETE FROM Exercise WHERE Id = @id";
+                    cmd.CommandText = "DELETE FROM Student WHERE Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     cmd.ExecuteNonQuery();
                 }
@@ -173,3 +169,4 @@ namespace StudentExercisesContinued.Data
     }
 
 }
+
