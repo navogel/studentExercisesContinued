@@ -29,16 +29,65 @@ namespace StudentExercisesContinued.Data
         /// </summary>
         public List<Exercise> GetAllExercises()
         {
-           
+
             using (SqlConnection conn = Connection)
             {
-               
+
                 conn.Open();
 
-                
+
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = "SELECT Id, Name, Language FROM Exercise";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Exercise> exercises = new List<Exercise>();
+
+                    while (reader.Read())
+                    {
+                        int idColumnPosition = reader.GetOrdinal("Id");
+                        int idValue = reader.GetInt32(idColumnPosition);
+
+                        int nameColumnPosition = reader.GetOrdinal("Name");
+                        string nameValue = reader.GetString(nameColumnPosition);
+
+                        int langColumnPosition = reader.GetOrdinal("Language");
+                        string langValue = reader.GetString(langColumnPosition);
+
+                        Exercise exercise = new Exercise
+                        {
+                            Id = idValue,
+                            Name = nameValue,
+                            Language = langValue
+                        };
+
+                        exercises.Add(exercise);
+                    }
+
+                    reader.Close();
+
+                    return exercises;
+                }
+            }
+        }
+
+        /// <summary>
+        ///  Returns a list of all exercises written in JS in the database
+        /// </summary>
+
+        public List<Exercise> GetAllJSExercises()
+        {
+
+            using (SqlConnection conn = Connection)
+            {
+
+                conn.Open();
+
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Id, Name, Language FROM Exercise WHERE [Language] = 'JS'";
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -118,9 +167,9 @@ namespace StudentExercisesContinued.Data
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    
+
                     cmd.CommandText = "INSERT INTO Exercise (Name, Language) OUTPUT INSERTED.Id Values (@Name, @Language)";
-                    cmd.Parameters.Add(new SqlParameter("@deptName", exercise.Name));
+                    cmd.Parameters.Add(new SqlParameter("@Name", exercise.Name));
                     cmd.Parameters.Add(new SqlParameter("@Language", exercise.Language));
                     int id = (int)cmd.ExecuteScalar();
 

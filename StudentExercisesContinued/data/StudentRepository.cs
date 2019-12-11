@@ -115,9 +115,11 @@ namespace StudentExercisesContinued.Data
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
 
-                    cmd.CommandText = "INSERT INTO Student (FirstName, LastName, SlackHandle, CohortId) OUTPUT INSERTED.Id Values (@Name, @Language)";
-                    cmd.Parameters.Add(new SqlParameter("@deptName", student.FirstName));
-                    cmd.Parameters.Add(new SqlParameter("@Language", student.LastName));
+                    cmd.CommandText = "INSERT INTO Student (FirstName, LastName, SlackHandle, CohortId) OUTPUT INSERTED.Id Values (@FirstName, @LastName, @SlackHandle, @CohortID)";
+                    cmd.Parameters.Add(new SqlParameter("@FirstName", student.FirstName));
+                    cmd.Parameters.Add(new SqlParameter("@LastName", student.LastName));
+                    cmd.Parameters.Add(new SqlParameter("@SlackHandle", student.SlackHandle));
+                    cmd.Parameters.Add(new SqlParameter("@CohortId", student.CohortId));
                     int id = (int)cmd.ExecuteScalar();
 
                     student.Id = id;
@@ -139,10 +141,12 @@ namespace StudentExercisesContinued.Data
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"UPDATE Student
-                                     SET Name = @Name, Language = @Language
+                                     SET FirstName = @FirstName, LastName = @LastName, SlackHandle = @SlackHandle, CohortId = @CohortId
                                      WHERE Id = @id";
-                    cmd.Parameters.Add(new SqlParameter("@Name", student.Name));
-                    cmd.Parameters.Add(new SqlParameter("@Language", student.Language));
+                    cmd.Parameters.Add(new SqlParameter("@FirstName", student.FirstName));
+                    cmd.Parameters.Add(new SqlParameter("@LastName", student.LastName));
+                    cmd.Parameters.Add(new SqlParameter("@SlackHandle", student.SlackHandle));
+                    cmd.Parameters.Add(new SqlParameter("@CohortId", student.CohortId));
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     cmd.ExecuteNonQuery();
